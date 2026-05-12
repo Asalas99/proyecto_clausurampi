@@ -22,19 +22,29 @@
 #include <chrono>
 
 int main(int argc, char* argv[]) {
-    if (argc < 3) {
-        std::cerr << "Uso: " << argv[0] << " <urls.txt> <salida.csv>\n";
+    if (argc != 4) {
+        std::cerr << "Uso: " << argv[0] << " <salida.csv> <query> <count>\n";
+        std::cerr << "Ejemplo: " << argv[0] << " out.csv shakespeare 6\n";
         return 1;
     }
 
-    // ---------- 1) Leer URLs ----------
-    std::vector<std::string> urls = read_urls(argv[1]);
+    const std::string output_csv = argv[1];
+    const std::string query      = argv[2];
+    const int         count      = std::atoi(argv[3]);
+
+    std::cerr << "[Serial] Consultando Gutendex API: query=\"" << query
+              << "\", count=" << count << "\n";
+
+    // ---------- 1) Descubrir URLs dinamicamente via Gutendex ----------
+    std::vector<std::string> urls = fetch_urls_dynamic(query, count);
     const int K = static_cast<int>(urls.size());
     if (K == 0) {
-        std::cerr << "[Serial] No se encontraron URLs en " << argv[1] << "\n";
+        std::cerr << "[Serial] No se obtuvieron URLs de Gutendex. "
+                     "Verifica conexion y query.\n";
         return 1;
     }
-    std::cerr << "[Serial] Procesando " << K << " libros...\n";
+    std::cerr << "[Serial] Procesando " << K
+              << " libros descubiertos dinamicamente...\n";
 
     // ---------- 2) Empezar a medir tiempo ----------
     auto t_start = std::chrono::high_resolution_clock::now();
@@ -59,7 +69,7 @@ int main(int argc, char* argv[]) {
     const int V = static_cast<int>(vocab.size());
 
     // ---------- 5) Escribir CSV (libros x palabras) ----------
-    std::ofstream out(argv[2]);
+    std::ofstream out(output_csv);
     if (!out) {
         std::cerr << "[Serial] Error: no se pudo abrir " << argv[2] << " para escritura.\n";
         return 1;
@@ -86,6 +96,6 @@ int main(int argc, char* argv[]) {
     std::cout << "TIEMPO_SERIAL=" << elapsed << "\n";
     std::cout << "[Serial] Libros: " << K
               << " | Vocabulario: " << V
-              << " | Archivo: " << argv[2] << "\n";
+              << " | Archivo: " << output_csv << "\n";
     return 0;
 }

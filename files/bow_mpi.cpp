@@ -68,22 +68,29 @@ int main(int argc, char* argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    if (argc < 3) {
+    if (argc != 4) {
         if (rank == 0)
-            std::cerr << "Uso: " << argv[0] << " <urls.txt> <salida.csv>\n";
+            std::cerr << "Uso: " << argv[0] << " <salida.csv> <query> <count>\n";
         MPI_Finalize();
         return 1;
     }
 
+    const std::string output_csv = argv[1];
+    const std::string query      = argv[2];
+    const int         count      = std::atoi(argv[3]);
+
     // =========================================================================
-    // PASO 1: Rank 0 lee URLs y las difunde
+    // PASO 1: Rank 0 descubre URLs dinamicamente via Gutendex y las difunde
     // =========================================================================
     std::vector<std::string> urls;
     int K = 0;
     if (rank == 0) {
-        urls = read_urls(argv[1]);
+        std::cerr << "[MPI] Consultando Gutendex API: query=\"" << query
+                  << "\", count=" << count << "\n";
+        urls = fetch_urls_dynamic(query, count);
         K = static_cast<int>(urls.size());
-        std::cerr << "[MPI] Procesos: " << size << " | Libros: " << K << "\n";
+        std::cerr << "[MPI] Procesos: " << size
+                  << " | Libros descubiertos: " << K << "\n";
     }
     MPI_Bcast(&K, 1, MPI_INT, 0, MPI_COMM_WORLD);
     if (K == 0) {
@@ -263,9 +270,9 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        std::ofstream out(argv[2]);
+        std::ofstream out(output_csv);
         if (!out) {
-            std::cerr << "[MPI] Error abriendo " << argv[2] << "\n";
+            std::cerr << "[MPI] Error abriendo " << output_csv << "\n";
         } else {
             out << "book";
             for (const auto& w : global_vocab) out << "," << w;
@@ -282,7 +289,7 @@ int main(int argc, char* argv[]) {
         std::cout << "[MPI] Procesos: " << size
                   << " | Libros: " << K
                   << " | Vocabulario: " << V
-                  << " | Archivo: " << argv[2] << "\n";
+                  << " | Archivo: " << output_csv << "\n";
     }
 
     MPI_Finalize();
