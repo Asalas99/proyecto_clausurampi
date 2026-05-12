@@ -1,0 +1,17 @@
+# Binarios compilados
+bow_serial
+bow_mpi
+
+# Salidas
+*.csv
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.cursor/
+
+# Temporales
+*.o
+*.log

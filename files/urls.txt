@@ -1,0 +1,10 @@
+# Lista de URLs de Project Gutenberg.
+# Una URL por línea. Las líneas vacías o que empiezan con '#' se ignoran.
+# Ejemplo con 6 obras de Shakespeare (formato del PDF del proyecto).
+
+https://www.gutenberg.org/cache/epub/2243/pg2243.txt
+https://www.gutenberg.org/cache/epub/1513/pg1513.txt
+https://www.gutenberg.org/cache/epub/1524/pg1524.txt
+https://www.gutenberg.org/cache/epub/1533/pg1533.txt
+https://www.gutenberg.org/cache/epub/1532/pg1532.txt
+https://www.gutenberg.org/cache/epub/1514/pg1514.txt
